@@ -42,4 +42,4 @@ Perfect for:
 Run:
 
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/electrodragon/sliq/main/install.sh)
+bash <(curl -s -H "Cache-Control: no-cache" 'https://raw.githubusercontent.com/electrodragon/sliq/main/install.sh')

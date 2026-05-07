@@ -1,198 +1,404 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
 <title>Sliq — Linux Presentation Viewer</title>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
-
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Instrument+Serif&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  :root{
+    --bg:#07070a;
+    --bg-elev:#0d0d12;
+    --border:rgba(255,255,255,0.08);
+    --border-strong:rgba(255,255,255,0.14);
+    --text:#f5f5f7;
+    --muted:rgba(245,245,247,0.6);
+    --accent:#7dff9b;
+    --accent-2:#a78bfa;
+    --accent-3:#60a5fa;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
+  /* Ambient gradient background */
+  body::before{
+    content:"";
+    position:fixed;inset:-20%;
+    background:
+      radial-gradient(40% 35% at 20% 15%, rgba(125,255,155,0.18), transparent 60%),
+      radial-gradient(35% 30% at 85% 20%, rgba(167,139,250,0.18), transparent 60%),
+      radial-gradient(45% 35% at 50% 90%, rgba(96,165,250,0.14), transparent 60%);
+    filter:blur(40px);
+    z-index:-2;
+    animation:drift 18s ease-in-out infinite alternate;
+  }
+  body::after{
+    content:"";
+    position:fixed;inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size:48px 48px;
+    mask-image:radial-gradient(ellipse 70% 60% at 50% 30%, #000 40%, transparent 80%);
+    z-index:-1;
+    pointer-events:none;
+  }
+  @keyframes drift{
+    0%{transform:translate(0,0) scale(1)}
+    100%{transform:translate(-3%,2%) scale(1.05)}
+  }
 
-body{
-    background:#050505;
-    color:white;
-    font-family:Arial, sans-serif;
-    overflow-x:hidden;
-}
+  /* Nav */
+  nav{
+    position:fixed;top:18px;left:50%;transform:translateX(-50%);
+    display:flex;align-items:center;gap:8px;
+    background:rgba(13,13,18,0.6);
+    border:1px solid var(--border);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    padding:8px 10px;border-radius:999px;
+    z-index:50;
+    opacity:0;transform:translate(-50%,-12px);
+    animation:navIn .9s .2s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  @keyframes navIn{to{opacity:1;transform:translate(-50%,0)}}
+  nav .brand{
+    display:flex;align-items:center;gap:8px;
+    padding:6px 14px;font-weight:700;letter-spacing:-.02em;
+  }
+  nav .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 16px var(--accent)}
+  nav a{
+    color:var(--muted);text-decoration:none;font-size:14px;
+    padding:8px 14px;border-radius:999px;transition:.25s;
+  }
+  nav a:hover{color:var(--text);background:rgba(255,255,255,0.05)}
 
-.hero{
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    padding:40px;
-}
+  /* Hero */
+  .hero{
+    min-height:100vh;display:flex;flex-direction:column;
+    justify-content:center;align-items:center;text-align:center;
+    padding:120px 24px 60px;position:relative;
+  }
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 14px;border:1px solid var(--border);
+    border-radius:999px;font-size:13px;color:var(--muted);
+    background:rgba(255,255,255,0.02);
+    margin-bottom:28px;
+    opacity:0;transform:translateY(14px);
+    animation:fadeUp .8s .25s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  .badge .pulse{
+    width:6px;height:6px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 0 0 rgba(125,255,155,.7);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(125,255,155,.7)}
+    70%{box-shadow:0 0 0 10px rgba(125,255,155,0)}
+    100%{box-shadow:0 0 0 0 rgba(125,255,155,0)}
+  }
 
-.logo{
-    font-size:120px;
-    font-weight:900;
-    letter-spacing:-6px;
-    margin-bottom:20px;
-}
+  .logo{
+    font-size:clamp(96px,18vw,200px);
+    font-weight:700;letter-spacing:-.07em;line-height:.9;
+    background:linear-gradient(180deg,#fff 30%, rgba(255,255,255,.45) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    margin-bottom:18px;
+    opacity:0;transform:translateY(30px);
+    animation:fadeUp 1s .35s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  .logo em{
+    font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;
+    background:linear-gradient(135deg,var(--accent),var(--accent-3));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .tagline{
+    font-size:clamp(18px,2.2vw,26px);color:var(--muted);
+    max-width:640px;margin-bottom:44px;
+    opacity:0;transform:translateY(20px);
+    animation:fadeUp 1s .5s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
 
-.tagline{
-    font-size:28px;
-    opacity:0.8;
-    margin-bottom:40px;
-}
+  /* Install / code box */
+  .code-card{
+    width:min(820px,95%);
+    background:linear-gradient(180deg,rgba(20,20,26,.9),rgba(13,13,18,.9));
+    border:1px solid var(--border);border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 30px 80px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.02) inset;
+    opacity:0;transform:translateY(24px) scale(.98);
+    animation:fadeUp 1s .65s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  .code-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 16px;border-bottom:1px solid var(--border);
+    background:rgba(255,255,255,0.02);
+  }
+  .traffic{display:flex;gap:6px}
+  .traffic span{width:11px;height:11px;border-radius:50%}
+  .traffic span:nth-child(1){background:#ff5f57}
+  .traffic span:nth-child(2){background:#febc2e}
+  .traffic span:nth-child(3){background:#28c840}
+  .code-head .label{font-family:'Geist Mono',monospace;font-size:12px;color:var(--muted)}
+  .copy-btn{
+    background:rgba(255,255,255,0.04);border:1px solid var(--border);
+    color:var(--muted);font-size:12px;padding:6px 12px;border-radius:8px;
+    cursor:pointer;transition:.2s;font-family:inherit;
+  }
+  .copy-btn:hover{color:var(--text);background:rgba(255,255,255,0.08);border-color:var(--border-strong)}
+  pre, code{
+    font-family:'Geist Mono','SF Mono',Menlo,monospace;
+    color:#e8e8ec;font-size:14.5px;line-height:1.7;
+  }
+  .code-body{padding:22px 24px;overflow-x:auto;text-align:left}
+  .code-body .prompt{color:var(--accent);user-select:none;margin-right:8px}
+  .code-body .str{color:#fcd34d}
+  .code-body .flag{color:var(--accent-2)}
+  .code-body .cmt{color:rgba(255,255,255,.35)}
 
-.install-box{
-    width:min(900px, 95%);
-    background:#101010;
-    border:1px solid #222;
-    border-radius:20px;
-    padding:30px;
-    overflow:auto;
-}
+  /* Sections */
+  section.section{
+    width:min(1100px,92%);margin:160px auto;
+    opacity:0;transform:translateY(40px);
+    transition:opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1);
+  }
+  section.section.in{opacity:1;transform:translateY(0)}
+  .eyebrow{
+    font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--accent);margin-bottom:14px;
+  }
+  h2{
+    font-size:clamp(36px,5vw,64px);font-weight:600;letter-spacing:-.03em;
+    line-height:1.05;margin-bottom:18px;
+  }
+  h2 em{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;color:var(--muted)}
+  .lede{font-size:clamp(16px,1.5vw,19px);color:var(--muted);max-width:640px;line-height:1.65;margin-bottom:40px}
 
-pre{
-    color:#7dff9b;
-    font-size:18px;
-    line-height:1.6;
-}
+  /* Features */
+  .features{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:18px;margin-top:36px;
+  }
+  .card{
+    position:relative;background:linear-gradient(180deg,rgba(20,20,26,.7),rgba(13,13,18,.7));
+    border:1px solid var(--border);border-radius:20px;padding:28px 26px;
+    overflow:hidden;transition:transform .4s cubic-bezier(.2,.8,.2,1), border-color .3s;
+  }
+  .card::before{
+    content:"";position:absolute;inset:0;border-radius:20px;padding:1px;
+    background:linear-gradient(135deg,rgba(125,255,155,.4),rgba(167,139,250,.3),transparent 60%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;
+    opacity:0;transition:opacity .35s;pointer-events:none;
+  }
+  .card:hover{transform:translateY(-4px);border-color:var(--border-strong)}
+  .card:hover::before{opacity:1}
+  .card .icon{
+    width:38px;height:38px;border-radius:10px;
+    display:grid;place-items:center;margin-bottom:18px;
+    background:rgba(125,255,155,.08);border:1px solid rgba(125,255,155,.2);
+    color:var(--accent);
+  }
+  .card h3{font-size:18px;font-weight:600;margin-bottom:8px;letter-spacing:-.01em}
+  .card p{font-size:14.5px;line-height:1.6;color:var(--muted)}
 
-.section{
-    width:min(1000px, 92%);
-    margin:120px auto;
-}
+  /* Controls */
+  .controls{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:14px;margin-top:36px;
+  }
+  .ctrl{
+    display:flex;align-items:center;gap:16px;
+    background:rgba(20,20,26,.6);border:1px solid var(--border);
+    border-radius:14px;padding:16px 20px;
+    transition:.25s;
+  }
+  .ctrl:hover{border-color:var(--border-strong);background:rgba(20,20,26,.9)}
+  kbd{
+    font-family:'Geist Mono',monospace;font-size:13px;
+    min-width:42px;height:36px;padding:0 10px;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:linear-gradient(180deg,#1a1a22,#0f0f15);
+    border:1px solid var(--border-strong);
+    border-bottom-width:2px;border-radius:8px;
+    box-shadow:0 1px 0 rgba(255,255,255,.04) inset;
+    color:var(--text);
+  }
+  .ctrl span{color:var(--muted);font-size:15px}
 
-h2{
-    font-size:52px;
-    margin-bottom:30px;
-}
+  /* Usage */
+  .usage-grid{display:grid;grid-template-columns:1fr;gap:0;margin-top:36px}
+  .usage-grid .code-card{width:100%}
+  .usage-line{display:flex;align-items:baseline;padding:6px 0}
+  .usage-line .desc{color:rgba(255,255,255,.35);margin-left:18px;font-size:13px}
 
-p{
-    font-size:22px;
-    line-height:1.8;
-    opacity:0.8;
-}
+  /* Footer */
+  footer{
+    text-align:center;padding:120px 20px 60px;color:var(--muted);
+    border-top:1px solid var(--border);margin-top:120px;
+  }
+  footer .flogo{
+    font-size:42px;font-weight:700;letter-spacing:-.04em;color:var(--text);margin-bottom:10px;
+  }
+  footer .flogo em{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;
+    background:linear-gradient(135deg,var(--accent),var(--accent-3));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  footer p{font-size:14px}
 
-.features{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(250px,1fr));
-    gap:25px;
-    margin-top:40px;
-}
+  /* Reveal */
+  .reveal{opacity:0;transform:translateY(30px);transition:opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1)}
+  .reveal.in{opacity:1;transform:translateY(0)}
 
-.card{
-    background:#101010;
-    border:1px solid #222;
-    border-radius:20px;
-    padding:30px;
-}
-
-.card h3{
-    margin-bottom:12px;
-    font-size:24px;
-}
-
-.card p{
-    font-size:17px;
-}
-
-.footer{
-    text-align:center;
-    padding:100px 20px;
-    opacity:0.5;
-}
-
+  @media (max-width:640px){
+    nav a:not(.brand){display:none}
+    section.section{margin:100px auto}
+  }
 </style>
-
 </head>
-
 <body>
 
-<section class="hero">
+<nav>
+  <div class="brand"><span class="dot"></span>Sliq</div>
+  <a href="#install">Install</a>
+  <a href="#usage">Usage</a>
+  <a href="#features">Features</a>
+  <a href="#controls">Controls</a>
+</nav>
 
-    <div class="logo">
-        Sliq
+<section class="hero" id="install">
+  <div class="badge"><span class="pulse"></span> v1.0 — Built for Linux</div>
+  <h1 class="logo">Sl<em>iq</em></h1>
+  <p class="tagline">A minimal, fast presentation viewer for the terminal-first generation.</p>
+
+  <div class="code-card">
+    <div class="code-head">
+      <div class="traffic"><span></span><span></span><span></span></div>
+      <div class="label">install.sh</div>
+      <button class="copy-btn" data-copy="install">Copy</button>
     </div>
-
-    <div class="tagline">
-        Minimal Linux Presentation Viewer
+    <div class="code-body">
+<pre id="install"><span class="prompt">$</span> bash &lt;(curl <span class="flag">-s</span> <span class="flag">-H</span> <span class="str">"Cache-Control: no-cache"</span> <span class="str">'https://raw.githubusercontent.com/electrodragon/sliq/main/install.sh'</span>)</pre>
     </div>
-
-    <div class="install-box">
-
-<pre>
-bash &lt;(curl -s https://raw.githubusercontent.com/electrodragon/sliq/main/install.sh)
-</pre>
-
-    </div>
-
+  </div>
 </section>
 
-<section class="section">
+<section class="section reveal" id="usage">
+  <div class="eyebrow">/ Usage</div>
+  <h2>Run it <em>anywhere</em>.</h2>
+  <p class="lede">Point Sliq at any directory of images and it builds a presentation instantly. No config, no setup.</p>
 
-    <h2>Usage</h2>
-
-<pre>
-sliq
-sliq .
-sliq ../presentation
-sliq ~/Pictures/slides
-</pre>
-
-</section>
-
-<section class="section">
-
-    <h2>Features</h2>
-
-    <div class="features">
-
-        <div class="card">
-            <h3>GSAP Animations</h3>
-            <p>Smooth browser-powered transitions.</p>
-        </div>
-
-        <div class="card">
-            <h3>Fullscreen Mode</h3>
-            <p>Optimized for presentations and demos.</p>
-        </div>
-
-        <div class="card">
-            <h3>Automatic Image Discovery</h3>
-            <p>Scans directories instantly.</p>
-        </div>
-
-        <div class="card">
-            <h3>Linux Native Workflow</h3>
-            <p>Built for terminal-first users.</p>
-        </div>
-
+  <div class="code-card">
+    <div class="code-head">
+      <div class="traffic"><span></span><span></span><span></span></div>
+      <div class="label">~/terminal</div>
+      <button class="copy-btn" data-copy="usage">Copy</button>
     </div>
-
+    <div class="code-body">
+<pre id="usage"><span class="prompt">$</span> sliq                          <span class="cmt"># current directory</span>
+<span class="prompt">$</span> sliq .                        <span class="cmt"># explicit cwd</span>
+<span class="prompt">$</span> sliq ../presentation          <span class="cmt"># relative path</span>
+<span class="prompt">$</span> sliq ~/Pictures/slides        <span class="cmt"># absolute path</span></pre>
+    </div>
+  </div>
 </section>
 
-<section class="section">
+<section class="section reveal" id="features">
+  <div class="eyebrow">/ Features</div>
+  <h2>Small footprint, <em>big impact</em>.</h2>
+  <p class="lede">Everything you need to present from a folder of images — nothing you don't.</p>
 
-    <h2>Controls</h2>
-
-<pre>
-→  Next Slide
-←  Previous Slide
-F  Toggle Fullscreen
-Double Click  Fullscreen
-</pre>
-
+  <div class="features">
+    <div class="card">
+      <div class="icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <h3>GSAP Animations</h3>
+      <p>Smooth, browser-powered transitions between every slide.</p>
+    </div>
+    <div class="card">
+      <div class="icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V3h4M21 7V3h-4M3 17v4h4M21 17v4h-4"/></svg>
+      </div>
+      <h3>Fullscreen Mode</h3>
+      <p>Optimized for live demos, conference talks, and screen shares.</p>
+    </div>
+    <div class="card">
+      <div class="icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </div>
+      <h3>Auto Discovery</h3>
+      <p>Scans the target directory and orders your slides instantly.</p>
+    </div>
+    <div class="card">
+      <div class="icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 20h8M12 18v2"/></svg>
+      </div>
+      <h3>Linux Native</h3>
+      <p>Built from the ground up for the terminal-first workflow.</p>
+    </div>
+  </div>
 </section>
 
-<div class="footer">
-    Sliq — Lightweight Presentation Runtime
-</div>
+<section class="section reveal" id="controls">
+  <div class="eyebrow">/ Controls</div>
+  <h2>Keyboard <em>first</em>.</h2>
+  <p class="lede">Every action is one keystroke away. Stay in the flow of your presentation.</p>
+
+  <div class="controls">
+    <div class="ctrl"><kbd>→</kbd><span>Next slide</span></div>
+    <div class="ctrl"><kbd>←</kbd><span>Previous slide</span></div>
+    <div class="ctrl"><kbd>F</kbd><span>Toggle fullscreen</span></div>
+    <div class="ctrl"><kbd>2×</kbd><span>Double-click for fullscreen</span></div>
+  </div>
+</section>
+
+<footer>
+  <div class="flogo">Sl<em>iq</em></div>
+  <p>Lightweight presentation runtime · Made for Linux</p>
+</footer>
+
+<script>
+  // Reveal on scroll
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }});
+  },{threshold:.15});
+  document.querySelectorAll('.reveal, .section').forEach(el=>io.observe(el));
+
+  // Copy buttons
+  document.querySelectorAll('.copy-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const id = btn.dataset.copy;
+      const txt = document.getElementById(id).innerText.replace(/^\$\s/gm,'').trim();
+      navigator.clipboard.writeText(txt);
+      const old = btn.textContent;
+      btn.textContent = 'Copied ✓';
+      btn.style.color = 'var(--accent)';
+      setTimeout(()=>{btn.textContent=old;btn.style.color=''},1400);
+    });
+  });
+
+  // Smooth anchor scroll
+  document.querySelectorAll('nav a').forEach(a=>{
+    a.addEventListener('click',e=>{
+      const id = a.getAttribute('href');
+      if(id?.startsWith('#')){
+        e.preventDefault();
+        document.querySelector(id)?.scrollIntoView({behavior:'smooth',block:'start'});
+      }
+    });
+  });
+
+  // Subtle parallax on hero logo
+  const logo = document.querySelector('.logo');
+  window.addEventListener('mousemove',(e)=>{
+    const x = (e.clientX / window.innerWidth - .5) * 8;
+    const y = (e.clientY / window.innerHeight - .5) * 8;
+    logo.style.transform = `translate(${x}px, ${y}px)`;
+  });
+</script>
 
 </body>
 </html>
