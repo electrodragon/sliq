@@ -4,6 +4,15 @@ Sliq is a lightweight Linux presentation viewer powered by HTML, GSAP animations
 
 It instantly turns any folder of images into a fullscreen animated presentation.
 
+---
+
+# 🌐 Visit Website
+
+https://electrodragon.github.io/sliq/
+
+---
+
+
 Perfect for:
 
 - Project demos
