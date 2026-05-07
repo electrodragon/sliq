@@ -1,9 +1,3 @@
-
----
-
-# install.sh
-
-```bash id="5t5m4o"
 #!/usr/bin/env bash
 
 set -e
