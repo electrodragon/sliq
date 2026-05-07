@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Sliq — Linux Presentation Viewer</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#050505;
+    color:white;
+    font-family:Arial, sans-serif;
+    overflow-x:hidden;
+}
+
+.hero{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:40px;
+}
+
+.logo{
+    font-size:120px;
+    font-weight:900;
+    letter-spacing:-6px;
+    margin-bottom:20px;
+}
+
+.tagline{
+    font-size:28px;
+    opacity:0.8;
+    margin-bottom:40px;
+}
+
+.install-box{
+    width:min(900px, 95%);
+    background:#101010;
+    border:1px solid #222;
+    border-radius:20px;
+    padding:30px;
+    overflow:auto;
+}
+
+pre{
+    color:#7dff9b;
+    font-size:18px;
+    line-height:1.6;
+}
+
+.section{
+    width:min(1000px, 92%);
+    margin:120px auto;
+}
+
+h2{
+    font-size:52px;
+    margin-bottom:30px;
+}
+
+p{
+    font-size:22px;
+    line-height:1.8;
+    opacity:0.8;
+}
+
+.features{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(250px,1fr));
+    gap:25px;
+    margin-top:40px;
+}
+
+.card{
+    background:#101010;
+    border:1px solid #222;
+    border-radius:20px;
+    padding:30px;
+}
+
+.card h3{
+    margin-bottom:12px;
+    font-size:24px;
+}
+
+.card p{
+    font-size:17px;
+}
+
+.footer{
+    text-align:center;
+    padding:100px 20px;
+    opacity:0.5;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<section class="hero">
+
+    <div class="logo">
+        Sliq
+    </div>
+
+    <div class="tagline">
+        Minimal Linux Presentation Viewer
+    </div>
+
+    <div class="install-box">
+
+<pre>
+bash &lt;(curl -s https://raw.githubusercontent.com/YOUR_USERNAME/sliq/main/install.sh)
+</pre>
+
+    </div>
+
+</section>
+
+<section class="section">
+
+    <h2>Usage</h2>
+
+<pre>
+sliq
+sliq .
+sliq ../presentation
+sliq ~/Pictures/slides
+</pre>
+
+</section>
+
+<section class="section">
+
+    <h2>Features</h2>
+
+    <div class="features">
+
+        <div class="card">
+            <h3>GSAP Animations</h3>
+            <p>Smooth browser-powered transitions.</p>
+        </div>
+
+        <div class="card">
+            <h3>Fullscreen Mode</h3>
+            <p>Optimized for presentations and demos.</p>
+        </div>
+
+        <div class="card">
+            <h3>Automatic Image Discovery</h3>
+            <p>Scans directories instantly.</p>
+        </div>
+
+        <div class="card">
+            <h3>Linux Native Workflow</h3>
+            <p>Built for terminal-first users.</p>
+        </div>
+
+    </div>
+
+</section>
+
+<section class="section">
+
+    <h2>Controls</h2>
+
+<pre>
+→  Next Slide
+←  Previous Slide
+F  Toggle Fullscreen
+Double Click  Fullscreen
+</pre>
+
+</section>
+
+<div class="footer">
+    Sliq — Lightweight Presentation Runtime
+</div>
+
+</body>
+</html>
