@@ -363,22 +363,55 @@
 <script>
   // Reveal on scroll
   const io = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }});
+    entries.forEach(e=>{ 
+      if(e.isIntersecting){ 
+        e.target.classList.add('in'); 
+        io.unobserve(e.target); 
+      }
+    });
   },{threshold:.15});
+
   document.querySelectorAll('.reveal, .section').forEach(el=>io.observe(el));
 
-  // Copy buttons
+
+  /* =========================
+     FIXED COPY SYSTEM (SAFE)
+  ========================== */
+
+  const COPY_MAP = {
+    install: `bash <(curl -s -H "Cache-Control: no-cache" 'https://raw.githubusercontent.com/electrodragon/sliq/main/install.sh')`,
+    usage: `sliq
+sliq .
+sliq ../presentation
+sliq ~/Pictures/slides`
+  };
+
   document.querySelectorAll('.copy-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const id = btn.dataset.copy;
-      const txt = document.getElementById(id).innerText.replace(/^\$\s/gm,'').trim();
-      navigator.clipboard.writeText(txt);
-      const old = btn.textContent;
-      btn.textContent = 'Copied ✓';
-      btn.style.color = 'var(--accent)';
-      setTimeout(()=>{btn.textContent=old;btn.style.color=''},1400);
+    btn.addEventListener('click', async () => {
+
+      const key = btn.dataset.copy;
+      const text = COPY_MAP[key];
+
+      if (!text) return;
+
+      try {
+        await navigator.clipboard.writeText(text);
+
+        const old = btn.textContent;
+        btn.textContent = 'Copied ✓';
+        btn.style.color = 'var(--accent)';
+
+        setTimeout(()=>{
+          btn.textContent = old;
+          btn.style.color = '';
+        }, 1200);
+
+      } catch (err) {
+        console.error("Copy failed:", err);
+      }
     });
   });
+
 
   // Smooth anchor scroll
   document.querySelectorAll('nav a').forEach(a=>{
