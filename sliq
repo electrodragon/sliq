@@ -1,0 +1,281 @@
+#!/usr/bin/env python3
+
+import os
+import re
+import sys
+import uuid
+import webbrowser
+from pathlib import Path
+
+
+SUPPORTED_EXTENSIONS = {
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+    ".gif",
+    ".bmp",
+    ".svg",
+    ".avif",
+}
+
+
+def natural_sort_key(text):
+    return [
+        int(c) if c.isdigit() else c.lower()
+        for c in re.split(r'(\d+)', text)
+    ]
+
+
+def get_target_directory():
+    """
+    Resolve directory from command line argument.
+    """
+
+    if len(sys.argv) > 1:
+        path = Path(sys.argv[1]).expanduser().resolve()
+    else:
+        path = Path.cwd()
+
+    if not path.exists():
+        print(f"[ERROR] Path does not exist: {path}")
+        sys.exit(1)
+
+    if not path.is_dir():
+        print(f"[ERROR] Path is not a directory: {path}")
+        sys.exit(1)
+
+    return path
+
+
+def scan_images(directory):
+    """
+    Scan directory for image files.
+    """
+
+    images = []
+
+    for file in directory.iterdir():
+
+        if not file.is_file():
+            continue
+
+        extension = file.suffix.lower()
+
+        if extension in SUPPORTED_EXTENSIONS:
+            images.append(file)
+
+    images.sort(key=lambda x: natural_sort_key(x.name))
+
+    return images
+
+
+def generate_html(images):
+
+    image_tags = []
+
+    for index, image in enumerate(images):
+
+        active_class = "active" if index == 0 else ""
+
+        image_tags.append(
+            f'<img src="file://{image}" class="slide {active_class}" />'
+        )
+
+    images_html = "\n".join(image_tags)
+
+    total = len(images)
+
+    return f"""
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Presentation Viewer</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+
+<style>
+
+* {{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}}
+
+html,
+body {{
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: black;
+}}
+
+.viewer {{
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+}}
+
+.slide {{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: black;
+    opacity: 0;
+}}
+
+.slide.active {{
+    opacity: 1;
+}}
+
+.counter {{
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    color: white;
+    z-index: 100;
+    font-family: Arial;
+    background: rgba(0,0,0,0.5);
+    padding: 8px 14px;
+    border-radius: 10px;
+}}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="viewer" id="viewer">
+
+    {images_html}
+
+    <div class="counter" id="counter">
+        1 / {total}
+    </div>
+
+</div>
+
+<script>
+
+const slides = document.querySelectorAll(".slide");
+const counter = document.getElementById("counter");
+const viewer = document.getElementById("viewer");
+
+let current = 0;
+const total = slides.length;
+
+function showSlide(index, direction = 1) {{
+
+    if (index < 0) index = total - 1;
+    if (index >= total) index = 0;
+
+    const currentSlide = slides[current];
+    const nextSlide = slides[index];
+
+    gsap.killTweensOf([currentSlide, nextSlide]);
+
+    gsap.to(currentSlide, {{
+        opacity: 0,
+        scale: 0.96,
+        duration: 0.35,
+        ease: "power2.out"
+    }});
+
+    currentSlide.classList.remove("active");
+
+    gsap.set(nextSlide, {{
+        opacity: 0,
+        x: direction * 80,
+        scale: 1.04
+    }});
+
+    nextSlide.classList.add("active");
+
+    gsap.to(nextSlide, {{
+        opacity: 1,
+        x: 0,
+        scale: 1,
+        duration: 0.6,
+        ease: "power3.out"
+    }});
+
+    current = index;
+
+    counter.innerText = `${{current + 1}} / ${{total}}`;
+}}
+
+document.addEventListener("keydown", (e) => {{
+    if (["ArrowRight", 'h', 'H'].includes(e.key)) {{
+        showSlide(current + 1, 1);
+    }}
+
+    if (["ArrowLeft", 'g', 'G'].includes(e.key)) {{
+        showSlide(current - 1, -1);
+    }}
+
+    if (e.key === "f" || e.key === "F") {{
+        if (!document.fullscreenElement) {{
+            viewer.requestFullscreen();
+        }} else {{
+            document.exitFullscreen();
+        }}
+    }}
+}});
+
+viewer.addEventListener("dblclick", async () => {{
+
+    if (!document.fullscreenElement) {{
+        await viewer.requestFullscreen();
+    }}
+    else {{
+        await document.exitFullscreen();
+    }}
+}});
+
+</script>
+
+</body>
+
+</html>
+"""
+
+
+def main():
+
+    target_directory = get_target_directory()
+
+    images = scan_images(target_directory)
+
+    if not images:
+        print("[ERROR] No images found.")
+        sys.exit(1)
+
+    unique_id = 'd62f3bb2-b13f-4abc-9a6f-f3647bfd6153'
+
+    temp_html_path = (
+        Path("/tmp")
+        / f"presentation_viewer_payload_page_{unique_id}.html"
+    )
+
+    html_content = generate_html(images)
+
+    with open(temp_html_path, "w", encoding="utf-8") as file:
+        file.write(html_content)
+
+    # print(f"[INFO] Generated: {temp_html_path}")
+
+    webbrowser.open(f"file://{temp_html_path}")
+
+
+if __name__ == "__main__":
+    main()
